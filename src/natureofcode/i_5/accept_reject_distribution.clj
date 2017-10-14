@@ -1,17 +1,23 @@
-(ns natureofcode.i-2.random-distribution
+(ns natureofcode.i-5.accept-reject-distribution
   (:require [quil.core :as q]
-            [natureofcode.core :refer [width height]]))
+            [natureofcode.core :refer [width height]]
+            [natureofcode.i-2.random-distribution :refer [draw-rect]]))
+
+(defn accept-reject []
+  (let [r1 (rand)
+        r2 (rand)
+        y (* r1 r1)]
+    (if (< r2 y)
+      r1
+      (recur))))
 
 (defn setup []
   (def random-counts (atom (vec (replicate 20 0)))))
 
-(defn draw-rect [rel-width index val]
-  (q/rect (* index rel-width) (- height val) (- rel-width 1) val))
-
 (defn draw []
   (q/background 255)
 
-  (let [index (rand-int (count @random-counts))]
+  (let [index (int (* (accept-reject) (count @random-counts)))]
     (swap! random-counts update-in [index] inc))
 
   (q/stroke 0)
@@ -23,7 +29,7 @@
     (dorun (map-indexed draw-fn @random-counts))))
 
 (defn run []
-  (q/defsketch random-distribution
+  (q/defsketch accept-reject-distribution
     :setup setup
     :draw draw
     :size [width height]))
